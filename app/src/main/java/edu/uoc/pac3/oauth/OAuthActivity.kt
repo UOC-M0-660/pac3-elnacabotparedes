@@ -2,14 +2,26 @@ package edu.uoc.pac3.oauth
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import edu.uoc.pac3.R
+import edu.uoc.pac3.data.TwitchApiService
+import edu.uoc.pac3.data.oauth.OAuthConstants.authorizationUrl
+import edu.uoc.pac3.data.oauth.OAuthConstants.clientID
+import edu.uoc.pac3.data.oauth.OAuthConstants.redirectUri
+import edu.uoc.pac3.data.oauth.OAuthConstants.scopes
 import kotlinx.android.synthetic.main.activity_oauth.*
+import java.util.*
 
 class OAuthActivity : AppCompatActivity() {
 
     private val TAG = "OAuthActivity"
+
+    private val uniqueState = UUID.randomUUID().toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,7 +31,16 @@ class OAuthActivity : AppCompatActivity() {
 
     fun buildOAuthUri(): Uri {
         // TODO: Create URI
-        return Uri.EMPTY
+        val uri = Uri.parse(authorizationUrl)
+                .buildUpon()
+                .appendQueryParameter("client_id", clientID)
+                .appendQueryParameter("redirect_uri", redirectUri)
+                .appendQueryParameter("response_type", "code")
+                .appendQueryParameter("scope", scopes.joinToString(separator = ":"))
+                .appendQueryParameter("state", uniqueState)
+                .build()
+
+        return uri
     }
 
     private fun launchOAuthAuthorization() {
@@ -27,6 +48,29 @@ class OAuthActivity : AppCompatActivity() {
         val uri = buildOAuthUri()
 
         // TODO: Set webView Redirect Listener
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                request?.let {
+                    // Check if this url is our OAuth redirect, otherwise ignore it
+                    if (request.url.toString().startsWith(redirectUri)) {
+                        // To prevent CSRF attacks, check that we got the same state value we sent, otherwise ignore it
+                        val responseState = request.url.getQueryParameter("state")
+                        if (responseState == uniqueState) {
+                            // This is our request, obtain the code!
+                            request.url.getQueryParameter("code")?.let { code ->
+                                // Got it!
+                                Log.d("OAuth", "Here is the authorization code! $code")
+                            } ?: run {
+                                // User cancelled the login flow
+                                // TODO: Handle error
+                            }
+                        }
+                    }
+                }
+                return super.shouldOverrideUrlLoading(view, request)
+            }
+        }
 
         // Load OAuth Uri
         webView.settings.javaScriptEnabled = true
@@ -42,7 +86,12 @@ class OAuthActivity : AppCompatActivity() {
 
         // TODO: Create Twitch Service
 
+
+
+        //twitchApiService.getTokens(authorizationCode)
+
         // TODO: Get Tokens from Twitch
+
 
         // TODO: Save access token and refresh token using the SessionManager class
     }
