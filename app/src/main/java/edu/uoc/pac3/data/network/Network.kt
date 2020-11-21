@@ -28,38 +28,17 @@ object Network {
     fun createHttpClient(context: Context): HttpClient {
         return HttpClient(OkHttp) {
             // TODO: Setup HttpClient
-            /*// Json
+            // Json
             install(JsonFeature) {
                 serializer = KotlinxSerializer(json)
             }
-            // Logging
-            install(Logging) {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        Log.v("Ktor", message)
-                    }
-                }
-                level = LogLevel.ALL
-            }
+
             // Timeout
             install(HttpTimeout) {
                 requestTimeoutMillis = 15000L
                 connectTimeoutMillis = 15000L
                 socketTimeoutMillis = 15000L
             }
-            // Apply to All Requests
-            defaultRequest {
-                parameter("api_key", "some_api_key")
-                // Content Type
-                if (this.method != HttpMethod.Get) contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-            }
-            // Optional OkHttp Interceptors
-            engine {
-                //addInterceptor(CurlInterceptor(Loggable { Log.v("Curl", it) }))
-            }
-            */
-
         }
     }
 
