@@ -11,6 +11,7 @@ import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import edu.uoc.pac3.R
+import edu.uoc.pac3.data.SessionManager
 import edu.uoc.pac3.data.TwitchApiService
 import edu.uoc.pac3.data.network.Network.createHttpClient
 import edu.uoc.pac3.data.oauth.OAuthConstants.authorizationUrl
@@ -107,9 +108,14 @@ class OAuthActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO)
         {
             val token = twitchApiService.getTokens(authorizationCode);
-            Log.d("OAuth", token.toString())
+            val sessionManager = SessionManager(applicationContext)
+            token?.accessToken?.let { sessionManager.saveAccessToken(it) }
+            token?.refreshToken?.let { sessionManager.saveRefreshToken(it)}
         }
 
         // TODO: Save access token and refresh token using the SessionManager class
+
+
+
     }
 }
