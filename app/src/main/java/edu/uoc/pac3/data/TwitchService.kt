@@ -8,9 +8,12 @@ import edu.uoc.pac3.data.oauth.OAuthConstants.clientSecret
 import edu.uoc.pac3.data.oauth.OAuthConstants.redirectUri
 import edu.uoc.pac3.data.oauth.OAuthTokensResponse
 import edu.uoc.pac3.data.oauth.UnauthorizedException
+import edu.uoc.pac3.data.streams.Stream
 import edu.uoc.pac3.data.streams.StreamsResponse
 import edu.uoc.pac3.data.user.User
 import io.ktor.client.*
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.http.cio.parseResponse
@@ -26,25 +29,6 @@ class TwitchApiService(private val httpClient: HttpClient) {
     private val TAG = "TwitchApiService"
 
     /// Gets Access and Refresh Tokens on Twitch
-
-        /*try {
-            val response = httpClient.post<OAuthTokensResponse>(Endpoints.token) {
-                parameter("client_id", clientID)
-                parameter("client_secret", clientSecret)
-                parameter("code", authorizationCode)
-                parameter("grant_type", "authorization_code")
-                parameter("redirect_uri", redirectUri)
-            }
-            Log.d("OAuth", "Access Token: ${response.accessToken}. Refresh Token: ${response.refreshToken}")
-
-            return response
-        }
-        catch (t: Throwable)
-        {
-            Log.d("OAuth", t.toString());
-        }*/
-
-
     suspend fun getTokens(authorizationCode: String): OAuthTokensResponse? {
         // TODO("Get Tokens from Twitch")
         val response = httpClient.post<OAuthTokensResponse>(Endpoints.token) {
@@ -61,9 +45,19 @@ class TwitchApiService(private val httpClient: HttpClient) {
 
     /// Gets Streams on Twitch
     @Throws(UnauthorizedException::class)
-    suspend fun getStreams(cursor: String? = null): StreamsResponse? {
-        TODO("Get Streams from Twitch")
-        TODO("Support Pagination")
+    suspend fun getStreams(accessToken: String?, cursor: String? = null): StreamsResponse? {
+        // TODO("Get Streams from Twitch")
+
+        val response = httpClient.get<StreamsResponse>("https://api.twitch.tv/helix/streams") {
+            headers {
+                append("Client-ID", clientID)
+                append("Authorization", "Bearer $accessToken")
+            }
+        }
+
+        return response
+
+        // TODO("Support Pagination")
     }
 
     /// Gets Current Authorized User on Twitch
