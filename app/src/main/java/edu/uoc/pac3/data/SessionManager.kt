@@ -15,10 +15,10 @@ class SessionManager(context: Context) {
 
     fun isUserAvailable(): Boolean {
         // TODO: Implement
-        if(getAccessToken() != " " && getRefreshToken() != " ")
+        /*if(getAccessToken() != " " && getRefreshToken() != " ")
         {
             return true
-        }
+        }*/
         return false
     }
 

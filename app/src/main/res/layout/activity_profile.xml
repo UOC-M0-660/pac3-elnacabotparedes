@@ -54,6 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_medium"
+            android:id="@+id/descriptionInformation"
             android:hint="@string/hint_user_description">
 
             <com.google.android.material.textfield.TextInputEditText

@@ -20,8 +20,11 @@ import edu.uoc.pac3.data.oauth.OAuthConstants.clientID
 import edu.uoc.pac3.data.oauth.OAuthConstants.redirectUri
 import edu.uoc.pac3.data.oauth.OAuthConstants.scopes
 import edu.uoc.pac3.data.oauth.OAuthTokensResponse
+import edu.uoc.pac3.twitch.profile.ProfileActivity
 import edu.uoc.pac3.twitch.streams.StreamsActivity
 import kotlinx.android.synthetic.main.activity_oauth.*
+import kotlinx.android.synthetic.main.activity_oauth.progressBar
+import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
@@ -71,6 +74,8 @@ class OAuthActivity : AppCompatActivity() {
                         val responseState = request.url.getQueryParameter("state")
                         if (responseState == uniqueState) {
                             // This is our request, obtain the code!
+                            Log.d("OAuth", "Request "+request.url.toString())
+
                             request.url.getQueryParameter("code")?.let { code ->
                                 // Got it!
                                 Log.d("OAuth", "Here is the authorization code! $code")
@@ -128,6 +133,6 @@ class OAuthActivity : AppCompatActivity() {
 
     fun startNewActivity()
     {
-        startActivity(Intent(this, StreamsActivity::class.java))
+        startActivity(Intent(this, ProfileActivity::class.java))
     }
 }

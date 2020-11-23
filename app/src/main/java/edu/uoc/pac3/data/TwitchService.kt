@@ -11,11 +11,9 @@ import edu.uoc.pac3.data.oauth.UnauthorizedException
 import edu.uoc.pac3.data.streams.Stream
 import edu.uoc.pac3.data.streams.StreamsResponse
 import edu.uoc.pac3.data.user.User
+import edu.uoc.pac3.data.user.Users
 import io.ktor.client.*
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.client.request.parameter
-import io.ktor.client.request.post
+import io.ktor.client.request.*
 import io.ktor.http.cio.parseResponse
 import java.io.IOException
 import java.lang.Exception
@@ -76,13 +74,37 @@ class TwitchApiService(private val httpClient: HttpClient) {
 
     /// Gets Current Authorized User on Twitch
     @Throws(UnauthorizedException::class)
-    suspend fun getUser(): User? {
-        TODO("Get User from Twitch")
+    suspend fun getUser(accessToken: String?): Users? {
+        //TODO("Get User from Twitch")
+
+        val response = httpClient.get<Users>(Endpoints.user) {
+            headers {
+                append("Client-ID", clientID)
+                append("Authorization", "Bearer $accessToken")
+            }
+        }
+
+        Log.d("OAuth", "response user" +response.toString())
+
+        return response
+
     }
 
     /// Gets Current Authorized User on Twitch
     @Throws(UnauthorizedException::class)
-    suspend fun updateUserDescription(description: String): User? {
-        TODO("Update User Description on Twitch")
+    suspend fun updateUserDescription(accessToken: String?, description: String): Users? {
+        // TODO("Update User Description on Twitch")
+
+        val response = httpClient.put<Users>(Endpoints.user)
+        {
+            headers {
+                append("Client-ID", clientID)
+                append("Authorization", "Bearer $accessToken")
+            }
+            parameter("description", description)
+        }
+
+        return response
+
     }
 }
