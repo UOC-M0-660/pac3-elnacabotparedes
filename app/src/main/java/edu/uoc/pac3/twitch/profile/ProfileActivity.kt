@@ -1,11 +1,13 @@
 package edu.uoc.pac3.twitch.profile
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import edu.uoc.pac3.LaunchActivity
 import edu.uoc.pac3.R
 import edu.uoc.pac3.data.SessionManager
 import edu.uoc.pac3.data.TwitchApiService
@@ -53,13 +55,13 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         updateDescription()
+        logout()
 
     }
 
     private fun updateDescription()
     {
         updateDescriptionButton.setOnClickListener {
-            Log.d("OAuth", userDescriptionEditText.text.toString())
             var newDescription = userDescriptionEditText.text.toString()
             lifecycleScope.launch(Dispatchers.IO)
             {
@@ -75,7 +77,11 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun logout()
     {
-        
+        logoutButton.setOnClickListener{
+            sessionManager.clearAccessToken()
+            sessionManager.clearAccessToken()
+            startActivity(Intent(this, LaunchActivity::class.java))
+        }
     }
 
     private fun showMessageDescription()

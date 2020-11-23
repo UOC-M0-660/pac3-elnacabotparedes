@@ -133,6 +133,6 @@ class OAuthActivity : AppCompatActivity() {
 
     fun startNewActivity()
     {
-        startActivity(Intent(this, ProfileActivity::class.java))
+        startActivity(Intent(this, StreamsActivity::class.java))
     }
 }
