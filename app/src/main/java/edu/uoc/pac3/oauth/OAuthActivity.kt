@@ -117,7 +117,17 @@ class OAuthActivity : AppCompatActivity() {
             token?.accessToken?.let { sessionManager.saveAccessToken(it) }
             Log.d("OAuth", "Access Token " + token!!.accessToken)
             token?.refreshToken?.let { sessionManager.saveRefreshToken(it)}
+
+            withContext(Dispatchers.Main)
+            {
+                startNewActivity();
+            }
         }
 
+    }
+
+    fun startNewActivity()
+    {
+        startActivity(Intent(this, StreamsActivity::class.java))
     }
 }

@@ -11,6 +11,7 @@ import edu.uoc.pac3.data.SessionManager
 import edu.uoc.pac3.data.TwitchApiService
 import edu.uoc.pac3.data.network.Network
 import edu.uoc.pac3.data.streams.Stream
+import edu.uoc.pac3.data.streams.StreamsResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -23,37 +24,42 @@ class StreamsActivity : AppCompatActivity() {
     private lateinit var viewAdapter: StreamCardAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
-    private var stream_list: List<Stream>? = null
+    private lateinit var sessionManager: SessionManager
+    private lateinit var  twitchApiService: TwitchApiService
+    private var stream_list: MutableList<Stream>? = null
+
+    private var visibleItemCount: Int = 0
+    private var totalItemCount: Int = 0
+    private var firstVisbileItem: Int = 0
+
+    private var cursor: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_streams)
         // Init RecyclerView
 
-        viewAdapter = StreamCardAdapter(this)
+        //Init variables
+        init()
+
 
         // TODO: Get Streams
-
-        val twitchApiService = TwitchApiService(Network.createHttpClient(applicationContext))
-
-        val sessionManager = SessionManager(applicationContext)
-
         val accessToken = sessionManager.getAccessToken()
-        Log.d("OAuth", accessToken)
-
 
         lifecycleScope.launch(Dispatchers.IO)
         {
             val accessToken = sessionManager.getAccessToken()
             val streams = accessToken?.let { twitchApiService.getStreams(it) }
             if (streams != null) {
-                stream_list = streams.data
+                stream_list = streams.data as ArrayList<Stream>?
             }
 
-            Log.d("OAuth", streams?.data?.get(0)?.thumbnail_url)
+            cursor = streams?.pagination?.cursor
+            Log.d("OAuth", streams?.pagination?.cursor)
 
             withContext(Dispatchers.Main)
             {
+                //Refresh the list when obtained
                 stream_list?.let { viewAdapter.setStreams(it) }
             }
         }
@@ -61,15 +67,78 @@ class StreamsActivity : AppCompatActivity() {
         stream_list?.let { viewAdapter.setStreams(it) }
         initRecyclerView()
 
+        //Add Scroll Listner
+        ScrollListener()
     }
 
+    //Detect when the recycleview is in the bottom and make a petition for 20 more streams
+    private fun ScrollListener()
+    {
+        recycleView.addOnScrollListener(object: RecyclerView.OnScrollListener()
+        {
 
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+
+                if(!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE)
+                {
+                    //Detect the bottom of the ScrollView
+
+                    lifecycleScope.launch(Dispatchers.IO)
+                    {
+                        val accessToken = sessionManager.getAccessToken()
+                        val streams = accessToken?.let { twitchApiService.getStreams(it, cursor) }
+
+                        Log.d("OAuth", (streams?.data?.count()).toString())
+                        if (streams != null) {
+                            AddToList(streams)
+                        }
+                        cursor = streams?.pagination?.cursor
+                        withContext(Dispatchers.Main)
+                        {
+                            //Refresh the list when obtained
+                            stream_list?.let { viewAdapter.setStreams(it) }
+                        }
+                    }
+
+                }
+
+            }
+
+        })
+    }
+
+    //Add new streams to the list
+    private fun AddToList(streams: StreamsResponse)
+    {
+
+        if( streams.data != null)
+        {
+            for ( stream in streams.data)
+            {
+                stream_list?.add(stream)
+            }
+
+        }
+    }
+
+    //Init all the parameters
+    private fun init()
+    {
+        viewAdapter = StreamCardAdapter(this)
+        recycleView = findViewById(R.id.recyclerView)
+        viewManager = LinearLayoutManager(this)
+
+        twitchApiService = TwitchApiService(Network.createHttpClient(applicationContext))
+        sessionManager = SessionManager(applicationContext)
+    }
+
+    //Init the recycleview
     private fun initRecyclerView() {
         // TODO: Implement
 
         viewManager = LinearLayoutManager(this)
 
-        recycleView = findViewById(R.id.recyclerView)
         recycleView.layoutManager = viewManager
 
         recycleView.adapter = viewAdapter

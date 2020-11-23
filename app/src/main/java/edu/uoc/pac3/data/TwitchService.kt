@@ -47,17 +47,31 @@ class TwitchApiService(private val httpClient: HttpClient) {
     @Throws(UnauthorizedException::class)
     suspend fun getStreams(accessToken: String?, cursor: String? = null): StreamsResponse? {
         // TODO("Get Streams from Twitch")
+        // TODO("Support Pagination")
 
-        val response = httpClient.get<StreamsResponse>("https://api.twitch.tv/helix/streams") {
-            headers {
-                append("Client-ID", clientID)
-                append("Authorization", "Bearer $accessToken")
+        if(cursor == null)
+        {
+            val response = httpClient.get<StreamsResponse>(Endpoints.streams) {
+                headers {
+                    append("Client-ID", clientID)
+                    append("Authorization", "Bearer $accessToken")
+                }
             }
+
+            return response
+        }
+        else
+        {
+            val response = httpClient.get<StreamsResponse>(Endpoints.streams) {
+                headers {
+                    append("Client-ID", edu.uoc.pac3.data.oauth.OAuthConstants.clientID)
+                    append("Authorization", "Bearer $accessToken")
+                }
+                parameter("after", cursor)
+            }
+            return response
         }
 
-        return response
-
-        // TODO("Support Pagination")
     }
 
     /// Gets Current Authorized User on Twitch
