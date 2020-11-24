@@ -1,5 +1,6 @@
 package edu.uoc.pac3.data
 
+import android.se.omapi.Session
 import android.util.Log
 import edu.uoc.pac3.data.network.Endpoints
 import edu.uoc.pac3.data.network.Network.createHttpClient
@@ -13,6 +14,7 @@ import edu.uoc.pac3.data.streams.StreamsResponse
 import edu.uoc.pac3.data.user.User
 import edu.uoc.pac3.data.user.Users
 import io.ktor.client.*
+import io.ktor.client.features.ClientRequestException
 import io.ktor.client.request.*
 import io.ktor.http.cio.parseResponse
 import java.io.IOException
@@ -36,7 +38,7 @@ class TwitchApiService(private val httpClient: HttpClient) {
             parameter("grant_type", "authorization_code")
             parameter("redirect_uri", redirectUri)
         }
-        //Log.d("OAuth", "Access Token: ${response.accessToken}. Refresh Token: ${response.refreshToken}")
+        Log.d("OAuth", "Access Token: ${response.accessToken}. Refresh Token: ${response.refreshToken}")
         return response
     }
 
@@ -47,29 +49,80 @@ class TwitchApiService(private val httpClient: HttpClient) {
         // TODO("Get Streams from Twitch")
         // TODO("Support Pagination")
 
-        if(cursor == null)
-        {
-            val response = httpClient.get<StreamsResponse>(Endpoints.streams) {
-                headers {
-                    append("Client-ID", clientID)
-                    append("Authorization", "Bearer $accessToken")
+
+
+            if(cursor == null)
+            {
+                try {
+                    val response = httpClient.get<StreamsResponse>(Endpoints.streams) {
+                        headers {
+                            append("Client-ID", clientID)
+                            append("Authorization", "Bearer $accessToken")
+                        }
+                    }
+
+                    return response
+                }catch (t: Throwable)
+                {
+                    getAnotherCredentials(t)
                 }
+
+            }
+            else
+            {
+                try {
+                    val response = httpClient.get<StreamsResponse>(Endpoints.streams) {
+                        headers {
+                            append("Client-ID", edu.uoc.pac3.data.oauth.OAuthConstants.clientID)
+                            append("Authorization", "Bearer $accessToken")
+                        }
+                        parameter("after", cursor)
+                    }
+                    return response
+                }catch (t: Throwable)
+                {
+                    getAnotherCredentials(t)
+                }
+
             }
 
-            return response
-        }
-        else
-        {
-            val response = httpClient.get<StreamsResponse>(Endpoints.streams) {
-                headers {
-                    append("Client-ID", edu.uoc.pac3.data.oauth.OAuthConstants.clientID)
-                    append("Authorization", "Bearer $accessToken")
-                }
-                parameter("after", cursor)
-            }
-            return response
-        }
+        return null
 
+    }
+
+
+    fun getAnotherCredentials(t: Throwable)
+    {
+        when(t)
+        {
+            is ClientRequestException ->
+            {
+                if (t.response?.status?.value == 401 || t.response?.status?.value == 400)
+                {
+                    throw UnauthorizedException
+                }
+
+            }
+        }
+    }
+
+    @Throws(UnauthorizedException::class)
+    suspend fun getAccessToken(refreshToken: String?): OAuthTokensResponse?
+    {
+        try {
+            val response = httpClient.post<OAuthTokensResponse>(Endpoints.token) {
+                parameter("client_id", clientID)
+                parameter("client_secret", clientSecret)
+                parameter("refresh_token", refreshToken)
+                parameter("grant_type", "refresh_token")
+            }
+            Log.d("OAuth", "Access Token: ${response.accessToken}. Refresh Token: ${response.refreshToken}")
+            return response
+        }catch (t: Throwable)
+        {
+            getAnotherCredentials(t)
+        }
+        return null
     }
 
     /// Gets Current Authorized User on Twitch
@@ -87,7 +140,6 @@ class TwitchApiService(private val httpClient: HttpClient) {
         Log.d("OAuth", "response user" +response.toString())
 
         return response
-
     }
 
     /// Gets Current Authorized User on Twitch

@@ -10,10 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import edu.uoc.pac3.LaunchActivity
 import edu.uoc.pac3.R
 import edu.uoc.pac3.data.SessionManager
 import edu.uoc.pac3.data.TwitchApiService
 import edu.uoc.pac3.data.network.Network
+import edu.uoc.pac3.data.oauth.UnauthorizedException
 import edu.uoc.pac3.data.streams.Stream
 import edu.uoc.pac3.data.streams.StreamsResponse
 import edu.uoc.pac3.twitch.profile.ProfileActivity
@@ -38,6 +40,8 @@ class StreamsActivity : AppCompatActivity() {
     private var firstVisbileItem: Int = 0
 
     private var cursor: String? = null
+    private var failRefresh: Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,33 +51,92 @@ class StreamsActivity : AppCompatActivity() {
         //Init variables
         init()
 
-
         // TODO: Get Streams
-        val accessToken = sessionManager.getAccessToken()
+        getStreams(sessionManager.getAccessToken())
 
-        lifecycleScope.launch(Dispatchers.IO)
-        {
-            val accessToken = sessionManager.getAccessToken()
-            val streams = accessToken?.let { twitchApiService.getStreams(it) }
-            if (streams != null) {
-                stream_list = streams.data as ArrayList<Stream>?
-            }
-
-            cursor = streams?.pagination?.cursor
-            Log.d("OAuth", streams?.pagination?.cursor)
-
-            withContext(Dispatchers.Main)
-            {
-                //Refresh the list when obtained
-                stream_list?.let { viewAdapter.setStreams(it) }
-            }
-        }
-
+        //Init recycleview
         stream_list?.let { viewAdapter.setStreams(it) }
         initRecyclerView()
 
         //Add Scroll Listner
         ScrollListener()
+    }
+
+    fun getStreams(accessToken: String?)
+    {
+        lifecycleScope.launch(Dispatchers.IO)
+        {
+            try {
+                val streams = accessToken?.let { twitchApiService.getStreams(it) }
+                if (streams != null) {
+                    stream_list = streams.data as ArrayList<Stream>?
+                }
+                cursor = streams?.pagination?.cursor
+
+                withContext(Dispatchers.Main)
+                {
+                    //Refresh the list when obtained
+                    stream_list?.let { viewAdapter.setStreams(it) }
+                }
+            }
+            catch (t: Throwable)
+            {
+
+                when(t)
+                {
+                    UnauthorizedException ->
+                        LoadWithRefreshToken()
+                }
+            }
+
+        }
+    }
+
+    private fun LoadWithRefreshToken()
+    {
+        if(sessionManager.getAccessToken() != null)
+        {
+            Log.d("OAuth", "Error with Access Token")
+
+            sessionManager.clearAccessToken()
+            var refreshToken = sessionManager.getRefreshToken()
+            lifecycleScope.launch(Dispatchers.IO)
+            {
+                try {
+
+                    val response = twitchApiService.getAccessToken(refreshToken)
+                    if (response != null) {
+                        response.accessToken?.let { sessionManager.saveAccessToken(it) }
+                        response.refreshToken?.let { sessionManager.saveAccessToken(it) }
+                        withContext(Dispatchers.Main)
+                        {
+                            getStreams(response.accessToken);
+                        }
+                    }
+                }catch (t: Throwable)
+                {
+                    when(t)
+                    {
+                        UnauthorizedException->
+                            failRefresh = true
+                    }
+                }
+
+                withContext(Dispatchers.IO)
+                {
+                    if(failRefresh == true)
+                    {
+                        Log.d("OAuth", "Fail with refresh token")
+                        gotoLogin()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun gotoLogin()
+    {
+        startActivity(Intent(this, LaunchActivity::class.java))
     }
 
     //Detect when the recycleview is in the bottom and make a petition for 20 more streams

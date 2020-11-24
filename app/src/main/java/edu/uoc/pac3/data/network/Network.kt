@@ -17,6 +17,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
+import okhttp3.Interceptor
 
 /**
  * Created by alex on 07/09/2020.
@@ -39,7 +40,6 @@ object Network {
                 connectTimeoutMillis = 15000L
                 socketTimeoutMillis = 15000L
             }
-
         }
     }
 
@@ -49,3 +49,5 @@ object Network {
         encodeDefaults = false
     }
 }
+
+
