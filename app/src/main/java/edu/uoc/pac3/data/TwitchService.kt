@@ -49,8 +49,6 @@ class TwitchApiService(private val httpClient: HttpClient) {
         // TODO("Get Streams from Twitch")
         // TODO("Support Pagination")
 
-
-
             if(cursor == null)
             {
                 try {
@@ -79,10 +77,12 @@ class TwitchApiService(private val httpClient: HttpClient) {
                         parameter("after", cursor)
                     }
                     return response
-                }catch (t: Throwable)
+                }
+                catch (t:Throwable)
                 {
                     getAnotherCredentials(t)
                 }
+
 
             }
 
@@ -130,33 +130,45 @@ class TwitchApiService(private val httpClient: HttpClient) {
     suspend fun getUser(accessToken: String?): Users? {
         //TODO("Get User from Twitch")
 
-        val response = httpClient.get<Users>(Endpoints.user) {
-            headers {
-                append("Client-ID", clientID)
-                append("Authorization", "Bearer $accessToken")
+        try {
+            val response = httpClient.get<Users>(Endpoints.user) {
+                headers {
+                    append("Client-ID", clientID)
+                    append("Authorization", "Bearer $accessToken")
+                }
             }
+
+            Log.d("OAuth", "response user" +response.toString())
+
+            return response
         }
-
-        Log.d("OAuth", "response user" +response.toString())
-
-        return response
+        catch (t:Throwable)
+        {
+            getAnotherCredentials(t)
+        }
+        return null
     }
 
     /// Gets Current Authorized User on Twitch
     @Throws(UnauthorizedException::class)
     suspend fun updateUserDescription(accessToken: String?, description: String): Users? {
         // TODO("Update User Description on Twitch")
-
-        val response = httpClient.put<Users>(Endpoints.user)
-        {
-            headers {
-                append("Client-ID", clientID)
-                append("Authorization", "Bearer $accessToken")
+        try {
+            val response = httpClient.put<Users>(Endpoints.user)
+            {
+                headers {
+                    append("Client-ID", clientID)
+                    append("Authorization", "Bearer $accessToken")
+                }
+                parameter("description", description)
             }
-            parameter("description", description)
+
+            return response
         }
-
-        return response
-
+        catch (t: Throwable)
+        {
+            getAnotherCredentials(t)
+        }
+        return null
     }
 }

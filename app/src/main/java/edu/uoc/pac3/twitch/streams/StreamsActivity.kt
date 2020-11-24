@@ -67,17 +67,29 @@ class StreamsActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO)
         {
             try {
-                val streams = accessToken?.let { twitchApiService.getStreams(it) }
-                if (streams != null) {
-                    stream_list = streams.data as ArrayList<Stream>?
+                var streams: StreamsResponse? = null
+                if( cursor == null)
+                {
+                    streams = accessToken?.let { twitchApiService.getStreams(it) }
+
+                    if (streams != null) {
+                        stream_list = streams.data as ArrayList<Stream>?
+                    }
+                }
+                else
+                {
+                    streams = accessToken?.let { twitchApiService.getStreams(it, cursor) }
+                    if (streams != null) {
+                        AddToList(streams)
+                    }
                 }
                 cursor = streams?.pagination?.cursor
-
                 withContext(Dispatchers.Main)
                 {
                     //Refresh the list when obtained
                     stream_list?.let { viewAdapter.setStreams(it) }
                 }
+
             }
             catch (t: Throwable)
             {
@@ -107,7 +119,7 @@ class StreamsActivity : AppCompatActivity() {
                     val response = twitchApiService.getAccessToken(refreshToken)
                     if (response != null) {
                         response.accessToken?.let { sessionManager.saveAccessToken(it) }
-                        response.refreshToken?.let { sessionManager.saveAccessToken(it) }
+                        response.refreshToken?.let { sessionManager.saveRefreshToken(it) }
                         withContext(Dispatchers.Main)
                         {
                             getStreams(response.accessToken);
@@ -136,6 +148,8 @@ class StreamsActivity : AppCompatActivity() {
 
     private fun gotoLogin()
     {
+        sessionManager.clearRefreshToken()
+        sessionManager.clearAccessToken()
         startActivity(Intent(this, LaunchActivity::class.java))
     }
 
@@ -154,19 +168,9 @@ class StreamsActivity : AppCompatActivity() {
 
                     lifecycleScope.launch(Dispatchers.IO)
                     {
-                        val accessToken = sessionManager.getAccessToken()
-                        val streams = accessToken?.let { twitchApiService.getStreams(it, cursor) }
 
-                        Log.d("OAuth", (streams?.data?.count()).toString())
-                        if (streams != null) {
-                            AddToList(streams)
-                        }
-                        cursor = streams?.pagination?.cursor
-                        withContext(Dispatchers.Main)
-                        {
-                            //Refresh the list when obtained
-                            stream_list?.let { viewAdapter.setStreams(it) }
-                        }
+                        getStreams(sessionManager.getAccessToken())
+
                     }
 
                 }
