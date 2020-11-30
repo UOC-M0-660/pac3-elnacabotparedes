@@ -6,6 +6,7 @@ import android.os.Bundle
 import edu.uoc.pac3.R
 import kotlinx.android.synthetic.main.activity_login.*
 
+//Make the login in the twitch plataform
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

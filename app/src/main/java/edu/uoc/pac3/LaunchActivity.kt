@@ -7,6 +7,7 @@ import edu.uoc.pac3.oauth.LoginActivity
 import edu.uoc.pac3.data.SessionManager
 import edu.uoc.pac3.twitch.streams.StreamsActivity
 
+//Launch the activity
 class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
