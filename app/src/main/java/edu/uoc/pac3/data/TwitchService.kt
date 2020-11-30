@@ -38,7 +38,6 @@ class TwitchApiService(private val httpClient: HttpClient) {
             parameter("grant_type", "authorization_code")
             parameter("redirect_uri", redirectUri)
         }
-        Log.d("OAuth", "Access Token: ${response.accessToken}. Refresh Token: ${response.refreshToken}")
         return response
     }
 
@@ -90,7 +89,7 @@ class TwitchApiService(private val httpClient: HttpClient) {
 
     }
 
-
+    //Throw the unathorized Exception to get another credentials
     fun getAnotherCredentials(t: Throwable)
     {
         when(t)
@@ -106,6 +105,7 @@ class TwitchApiService(private val httpClient: HttpClient) {
         }
     }
 
+    //Get the access token
     @Throws(UnauthorizedException::class)
     suspend fun getAccessToken(refreshToken: String?): OAuthTokensResponse?
     {
@@ -116,7 +116,6 @@ class TwitchApiService(private val httpClient: HttpClient) {
                 parameter("refresh_token", refreshToken)
                 parameter("grant_type", "refresh_token")
             }
-            Log.d("OAuth", "Access Token: ${response.accessToken}. Refresh Token: ${response.refreshToken}")
             return response
         }catch (t: Throwable)
         {
@@ -137,9 +136,6 @@ class TwitchApiService(private val httpClient: HttpClient) {
                     append("Authorization", "Bearer $accessToken")
                 }
             }
-
-            Log.d("OAuth", "response user" +response.toString())
-
             return response
         }
         catch (t:Throwable)

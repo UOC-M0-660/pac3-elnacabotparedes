@@ -13,6 +13,7 @@ class SessionManager(context: Context) {
 
     val context = context
 
+    //If user is available
     fun isUserAvailable(): Boolean {
         // TODO: Implement
         if(getAccessToken() != " " && getRefreshToken() != " ")
@@ -22,6 +23,7 @@ class SessionManager(context: Context) {
         return false
     }
 
+    //Get the access tokens
     fun getAccessToken(): String? {
         // TODO: Implement
         val sharedPreferences = context.getSharedPreferences(context.getString(R.string.access_token), Context.MODE_PRIVATE)
@@ -29,6 +31,7 @@ class SessionManager(context: Context) {
 
     }
 
+    //Save the access token in the SharedPreferences
     fun saveAccessToken(accessToken: String) {
         //TODO("Save Access Token")
 
@@ -39,6 +42,7 @@ class SessionManager(context: Context) {
         }
     }
 
+    //Remove the access token for the Shared Preferences
     fun clearAccessToken() {
         //TODO("Clear Access Token")
         val sharedPreferences = context.getSharedPreferences(context.getString(R.string.access_token), Context.MODE_PRIVATE)
@@ -48,6 +52,7 @@ class SessionManager(context: Context) {
         }
     }
 
+    //Get the refresh token
     fun getRefreshToken(): String? {
         //TODO("Get Refresh Token")
 
@@ -55,6 +60,7 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString(context.getString(R.string.refresh_token), " ")
     }
 
+    //Save the refresh token in the Shared Preferences
     fun saveRefreshToken(refreshToken: String) {
         //TODO("Save Refresh Token")
 
@@ -66,6 +72,7 @@ class SessionManager(context: Context) {
 
     }
 
+    //Remove refresh token from the Shared Preferences
     fun clearRefreshToken() {
        // TODO("Clear Refresh Token")
         val sharedPreferences = context.getSharedPreferences(context.getString(R.string.refresh_token), Context.MODE_PRIVATE)

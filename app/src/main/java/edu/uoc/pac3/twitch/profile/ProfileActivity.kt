@@ -41,8 +41,10 @@ class ProfileActivity : AppCompatActivity() {
         twitchApiService = TwitchApiService(Network.createHttpClient(applicationContext))
         sessionManager = SessionManager(applicationContext)
 
+        //Make the petiton of the user data
         getProfileDetails(sessionManager.getAccessToken());
 
+        //Update the description of the user
         updateDescriptionButton.setOnClickListener {
             updateDescription(sessionManager.getAccessToken())
         }
@@ -51,6 +53,7 @@ class ProfileActivity : AppCompatActivity() {
 
     }
 
+    //Receive the user information data
     private fun getProfileDetails(token: String?)
     {
         lifecycleScope.launch(Dispatchers.IO)
@@ -79,6 +82,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    //Load the data if the access token fail
     private fun LoadDataWithRefreshToken(petition: String)
     {
         if(sessionManager.getAccessToken() != null)
@@ -133,11 +137,13 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    //Return to login the refresh token fail
     private fun gotoLogin()
     {
         startActivity(Intent(this, LaunchActivity::class.java))
     }
 
+    //Update the description from the user
     private fun updateDescription(token: String?)
     {
         var newDescription = userDescriptionEditText.text.toString()
@@ -161,7 +167,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-
+    //Make a logout removing the tokens
     private fun logout()
     {
         logoutButton.setOnClickListener{
@@ -171,11 +177,13 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    //Show message to say that the description is updated
     private fun showMessageDescription()
     {
         Toast.makeText(this, "Description Updated", Toast.LENGTH_SHORT).show()
     }
 
+    //Update user info when recived from the server
     private fun updateUserInfo()
     {
         if(userName != null)

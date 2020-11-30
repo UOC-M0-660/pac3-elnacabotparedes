@@ -8,6 +8,8 @@ import kotlinx.serialization.Serializable
  * Created by alex on 07/09/2020.
  */
 
+//Prepare the information from the user
+
 @Serializable
 data class User(
         @SerialName("display_name")val userName: String? = null,

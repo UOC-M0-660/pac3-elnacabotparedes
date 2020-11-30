@@ -8,6 +8,8 @@ import kotlinx.serialization.Serializable
  * Created by alex on 07/09/2020.
  */
 
+//Prepare the petition of the stream
+
 @Serializable
 data class Stream(
         @SerialName("user_name") val userName: String? = null,

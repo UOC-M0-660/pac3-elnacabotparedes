@@ -62,6 +62,7 @@ class StreamsActivity : AppCompatActivity() {
         ScrollListener()
     }
 
+    //Ask the petition to recive streams
     fun getStreams(accessToken: String?)
     {
         lifecycleScope.launch(Dispatchers.IO)
@@ -104,6 +105,7 @@ class StreamsActivity : AppCompatActivity() {
         }
     }
 
+    //Ask the petition but now with refresh token
     private fun LoadWithRefreshToken()
     {
         if(sessionManager.getAccessToken() != null)
@@ -146,6 +148,7 @@ class StreamsActivity : AppCompatActivity() {
         }
     }
 
+    //Go to login the refresh token fail
     private fun gotoLogin()
     {
         sessionManager.clearRefreshToken()
@@ -217,12 +220,14 @@ class StreamsActivity : AppCompatActivity() {
 
     }
 
+    //Create the menu in the top
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.profile_menu, menu)
         return true
     }
 
+    //Detect if the user button is clicked
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId)
         {

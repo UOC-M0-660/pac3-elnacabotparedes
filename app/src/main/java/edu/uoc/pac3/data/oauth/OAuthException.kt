@@ -4,6 +4,8 @@ package edu.uoc.pac3.data.oauth
  * Created by alex on 24/10/2020.
  */
 
+//Exceptions for the user
+
 sealed class OAuthException : Throwable()
 
 // Use this exception to indicate user is not authorized

@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
  * Created by alex on 07/09/2020.
  */
 
+//Prepare the petitition for the tokens
+
 @Serializable
 data class OAuthTokensResponse(
         @SerialName("access_token") val accessToken: String,

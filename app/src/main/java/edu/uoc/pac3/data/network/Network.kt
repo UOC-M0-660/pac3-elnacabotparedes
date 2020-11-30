@@ -22,6 +22,9 @@ import okhttp3.Interceptor
 /**
  * Created by alex on 07/09/2020.
  */
+
+//Prepare the HTTPClient for the petitions
+
 object Network {
 
     private const val TAG = "Network"

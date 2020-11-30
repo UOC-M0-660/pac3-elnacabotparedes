@@ -12,6 +12,8 @@ import com.bumptech.glide.Glide
 import edu.uoc.pac3.R
 import edu.uoc.pac3.data.streams.Stream
 
+
+//Adapter for the recycleview in the Stream activity
 class StreamCardAdapter(context: Context) :
     RecyclerView.Adapter<StreamCardAdapter.MyViewHolder>() {
 
@@ -39,6 +41,7 @@ class StreamCardAdapter(context: Context) :
 
     }
 
+    //Show the streaming information
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         //TODO("Not yet implemented")
 
@@ -51,6 +54,7 @@ class StreamCardAdapter(context: Context) :
 
     }
 
+    //Make a resize of the image
     private fun imageSizeReplace(image: String): String? {
         var new_image = image.replace("{width}", "1920").replace("{height}", "1080")
         return new_image

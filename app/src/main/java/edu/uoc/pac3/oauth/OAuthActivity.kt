@@ -45,6 +45,7 @@ class OAuthActivity : AppCompatActivity() {
         launchOAuthAuthorization()
     }
 
+    //Build the OAuth URI
     fun buildOAuthUri(): Uri {
         // TODO: Create URI
         val uri = Uri.parse(authorizationUrl)
@@ -59,6 +60,7 @@ class OAuthActivity : AppCompatActivity() {
         return uri
     }
 
+    //Launch the activity and Ask for the tokens
     private fun launchOAuthAuthorization() {
         //  Create URI
         val uri = buildOAuthUri()
@@ -120,7 +122,6 @@ class OAuthActivity : AppCompatActivity() {
 
             val sessionManager = SessionManager(applicationContext)
             token?.accessToken?.let { sessionManager.saveAccessToken(it) }
-            Log.d("OAuth", "Access Token " + token!!.accessToken)
             token?.refreshToken?.let { sessionManager.saveRefreshToken(it)}
 
             withContext(Dispatchers.Main)
